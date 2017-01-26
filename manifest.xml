@@ -1,0 +1,49 @@
+<Items>
+    <Item type="module"
+          name="frameworkres"
+          version="1.1.0"
+          health="stable"
+          author="Jake Valletta (jakev)"
+          about="Configure framework resources for unpacking and repacking."
+          localName="frameworkres" />
+
+    <Item type="module"
+          name="pbroadcasts"
+          version="1.0.0"
+          health="beta"
+          author="Jake Valletta (jakev)"
+          about="Print protected broadcast actions."
+          localName="pbroadcasts" />
+
+    <Item type="module"
+          name="permissions"
+          version="1.2.0"
+          health="beta"
+          author="Jake Valletta (jakev)"
+          about="Permission searching and lookups."
+          localName="permissions" />
+
+    <Item type="module"
+          name="platformdb"
+          version="1.0.0"
+          health="beta"
+          author="Jake Valletta (jakev)"
+          about="Create and query platform database."
+          localName="platformdb" />
+
+    <Item type="module"
+          name="sysappdb"
+          version="1.1.0"
+          health="beta"
+          author="Jake Valletta (jakev)"
+          about="System application database manipulation."
+          localName="sysappdb" />
+
+    <Item type="library"
+          name="AppDb"
+          about="Application Database API"
+          version="1.0.0"
+          health="stable"
+          author="Jake Valletta (jakev)"
+          localName="AppDb" />
+</Items>

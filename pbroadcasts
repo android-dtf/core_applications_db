@@ -29,7 +29,7 @@ class pbroadcasts(Module):
     author = 'Jake Valletta (jakev)'
     health = 'beta'
     name = 'pbroadcasts'
-    version = '1.0'
+    version = '1.0.0'
   
     def execute(self, args):
   

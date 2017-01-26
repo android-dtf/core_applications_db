@@ -39,6 +39,14 @@
           about="System application database manipulation."
           localName="sysappdb" />
 
+    <Item type="module"
+          name="userapps"
+          version="1.0.0"
+          health="beta"
+          author="Jake Valletta (jakev)"
+          about="Get list of applications installed by a user (JB+)."
+          localName="userapps" />
+
     <Item type="library"
           name="AppDb"
           about="Application Database API"

@@ -17,14 +17,14 @@
 #@About: Get list of applications installed by a user (JB+).
 #@Author: Jake Valletta (jakev)
 #@Health: beta
-#@Version: 1.0
+#@Version: 1.0.0
 
 . $DTF_CORE
 . $DTF_LOG
 
 sdk=$(dtf prop get Info sdk)
 
-if [ $sdk -lt $JELLY_BEAN ]; then
+if [ $sdk -lt $API_JELLY_BEAN ]; then
     echo "This module only works with Jelly Bean or newer devices!"
     exit -1
 fi

@@ -265,7 +265,7 @@ class sysappdb(Module):
     author = 'Jake Valletta (jakev)'
     health = 'beta'
     name = 'sysappdb'
-    version = '1.1.0'
+    version = '1.1.1'
 
     def handle_ctrl_c(self, signum, stack):
 
@@ -1393,16 +1393,21 @@ class sysappdb(Module):
 
         """Process the application signature"""
 
-        rsa_files = Utils.get_files_in_zip(path_to_apk, "META-INF/*.RSA")
+        # Try RSA first, fail to DSA
+        sig_files = Utils.get_files_in_zip(path_to_apk, "META-INF/*.RSA")
+        if sig_files is None:
+            log.i(TAG, "No RSA keys found, trying DSA")
+            sig_files = Utils.get_files_in_zip(path_to_apk, "META-INF/*.DSA")
 
-        if len(rsa_files) != 1:
-            log.e(TAG, "Unable to determine RSA file!")
+        # Nothing?
+        if sig_files is None:
+            log.e(TAG, "Unable to find RSA or DSA signatures, giving up!")
             return None
 
-        rsa_file = rsa_files[0]
+        sig_file = sig_files[0]
 
         lexed = shlex.split("unzip -q -c \"%s\" \"%s\""
-                                                % (path_to_apk, rsa_file))
+                                                % (path_to_apk, sig_file))
 
         proc = Popen(lexed, stdout=PIPE, shell=False)
         proc.wait()
@@ -1421,7 +1426,7 @@ class sysappdb(Module):
         openssl_out = proc.communicate(input=manifest_cert)[0]
 
         if proc.returncode != 0:
-            log.e(TAG, "Error parsing CERT.RSA: %s" % path_to_apk)
+            log.e(TAG, "Error parsing cert info %s" % path_to_apk)
             return None
 
         split_out = openssl_out.split("\n")

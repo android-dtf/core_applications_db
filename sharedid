@@ -35,8 +35,8 @@ class sharedid(Module):
     about = 'Find apps with a shared ID or by shared ID.'
     author = 'Jake Valletta (jakev)'
     health = 'stable'
-    name = 'platformdiff'
-    version = '1.1'
+    name = 'sharedid'
+    version = '1.1.0'
 
     @classmethod
     def determine_diff_database(cls, args):

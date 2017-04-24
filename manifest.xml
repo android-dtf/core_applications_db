@@ -32,6 +32,14 @@
           localName="platformdb" />
 
     <Item type="module"
+          name="sharedid"
+          version="1.1.0"
+          health="beta"
+          author="Jake Valletta (jakev)"
+          about="Find apps with a shared ID or by shared ID."
+          localName="sharedid" />
+
+    <Item type="module"
           name="sysappdb"
           version="1.1.1"
           health="beta"

@@ -265,7 +265,7 @@ class sysappdb(Module):
     author = 'Jake Valletta (jakev)'
     health = 'beta'
     name = 'sysappdb'
-    version = '1.1.1'
+    version = '1.1.2'
 
     def handle_ctrl_c(self, signum, stack):
 
@@ -2582,8 +2582,13 @@ class sysappdb(Module):
         app_list = self.get_package_list(blacklist, resume,
                                          local_sysapps_db_name)
 
-        # Create new AppDb (no resume)
+        # Create AppDb and system-apps dir if new.
         if not resume:
+
+            # Make the dir.
+            os.mkdir(SYSTEM_APPS_DIR)
+
+            # Create/prep the db.
             if self.prepare_db(local_sysapps_db_name, app_list) != 0:
                 log.e(TAG, "Error preparing local DB!")
                 return -4
@@ -2594,7 +2599,6 @@ class sysappdb(Module):
         config['local_db'] = local_sysapps_db_name
 
         return self.do_pull(app_list, config)
-
 
     def cmd_update(self, args):
 

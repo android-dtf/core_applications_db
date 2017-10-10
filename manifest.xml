@@ -41,7 +41,7 @@
 
     <Item type="module"
           name="sysappdb"
-          version="1.1.1"
+          version="1.1.2"
           health="beta"
           author="Jake Valletta (jakev)"
           about="System application database manipulation."

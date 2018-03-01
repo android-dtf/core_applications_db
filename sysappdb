@@ -263,9 +263,8 @@ class sysappdb(Module):
 
     about = 'System application database manipulation.'
     author = 'Jake Valletta (jakev)'
-    health = 'beta'
     name = 'sysappdb'
-    version = '1.1.2'
+    version = '1.1.3'
 
     def handle_ctrl_c(self, signum, stack):
 
@@ -611,7 +610,7 @@ class sysappdb(Module):
 
             if file_type == TYPE_DEX:
                 log.i(TAG, "DEX file found in APK, unpacking with baksmali.")
-                out, err, rtn = baksmali("-a %s -o %s %s" %
+                out, err, rtn = baksmali("d -a %s -o %s %s" %
                                 (sdk, smali_dir, classes_file))
 
                 if rtn != 0:
@@ -643,7 +642,7 @@ class sysappdb(Module):
                     framework_dir = prop.get_prop("Local", "framework-dir")
 
                     log.i(TAG, "ODEX found outside APK, using baksmali.")
-                    out, err, rtn = baksmali("-x -a %s -d %s -o %s %s" %
+                    out, err, rtn = baksmali("x -a %s -d %s -o %s %s" %
                                 (sdk, framework_dir, smali_dir, odex_file))
                     if rtn != 0:
                         log.e(TAG, "Error unpacking class files! (%d)" % rtn)
@@ -653,7 +652,7 @@ class sysappdb(Module):
                     framework_dir = prop.get_prop("Local", "framework-dir")
 
                     log.i(TAG, "DEX found outside APK, using baksmali.")
-                    out, err, rtn = baksmali("-a %s -o %s %s" %
+                    out, err, rtn = baksmali("d -a %s -o %s %s" %
                                 (sdk, smali_dir, odex_file))
                     if rtn != 0:
                         log.e(TAG, "Error unpacking class files! (%d)" % rtn)

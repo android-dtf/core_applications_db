@@ -2,7 +2,6 @@
     <Item type="module"
           name="frameworkres"
           version="1.1.0"
-          health="stable"
           author="Jake Valletta (jakev)"
           about="Configure framework resources for unpacking and repacking."
           localName="frameworkres" />
@@ -10,7 +9,6 @@
     <Item type="module"
           name="pbroadcasts"
           version="1.0.0"
-          health="beta"
           author="Jake Valletta (jakev)"
           about="Print protected broadcast actions."
           localName="pbroadcasts" />
@@ -18,7 +16,6 @@
     <Item type="module"
           name="permissions"
           version="1.2.0"
-          health="beta"
           author="Jake Valletta (jakev)"
           about="Permission searching and lookups."
           localName="permissions" />
@@ -26,7 +23,6 @@
     <Item type="module"
           name="platformdb"
           version="1.0.0"
-          health="beta"
           author="Jake Valletta (jakev)"
           about="Create and query platform database."
           localName="platformdb" />
@@ -34,15 +30,13 @@
     <Item type="module"
           name="sharedid"
           version="1.1.0"
-          health="beta"
           author="Jake Valletta (jakev)"
           about="Find apps with a shared ID or by shared ID."
           localName="sharedid" />
 
     <Item type="module"
           name="sysappdb"
-          version="1.1.2"
-          health="beta"
+          version="1.1.3"
           author="Jake Valletta (jakev)"
           about="System application database manipulation."
           localName="sysappdb" />
@@ -50,7 +44,6 @@
     <Item type="module"
           name="userapps"
           version="1.0.0"
-          health="beta"
           author="Jake Valletta (jakev)"
           about="Get list of applications installed by a user (JB+)."
           localName="userapps" />
@@ -59,7 +52,6 @@
           name="AppDb"
           about="Application Database API"
           version="1.0.0"
-          health="stable"
           author="Jake Valletta (jakev)"
           localName="AppDb" />
 </Items>

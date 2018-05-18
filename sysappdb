@@ -18,12 +18,15 @@
 """Application Manipulation"""
 import dtf.logging as log
 import dtf.properties as prop
+import dtf.constants as constants
 
 from dtf.adb import DtfAdb
 from dtf.globals import DTF_PACKAGES_DIR
 from dtf.included import apktool, aapt, baksmali, axmlprinter2
 from dtf.module import Module
 from dtf.packages import launch_module
+
+from dtf.core.compat import StringIO
 
 import AppDb
 import Utils
@@ -87,6 +90,9 @@ FILTER_RECEIVERS = "receivers"
 FILTER_PERMISSIONS = "permissions"
 FILTER_USES_PERMISSIONS = "uses-permissions"
 # End Exposed Stuff
+
+CPU_OAT_DIRS = {'arm': ['arm', 'arm64'],
+                'x86': ['x86', 'x86_64']}
 
 missing_perm_list = None
 
@@ -264,7 +270,7 @@ class sysappdb(Module):
     about = 'System application database manipulation.'
     author = 'Jake Valletta (jakev)'
     name = 'sysappdb'
-    version = '1.1.3'
+    version = '1.1.4'
 
     def handle_ctrl_c(self, signum, stack):
 
@@ -3097,6 +3103,21 @@ class PullThread(threading.Thread):
         self.no_md5 = no_md5
         self.LTAG = ''
 
+    @classmethod
+    def generate_cpu_dir(cls):
+
+        """Determine the structure of the CPU-specific OAT directory"""
+
+        cpu_bits = prop.get_prop("Info", "cpu-bits")
+        cpu_arch = prop.get_prop("Info", "cpu-arch")
+
+        index = 0
+        if cpu_bits == "64":
+            index = 1
+
+        return CPU_OAT_DIRS[cpu_arch][index]
+
+    @classmethod
     def shutdown(self):
 
         """Begin kill process"""
@@ -3128,108 +3149,45 @@ class PullThread(threading.Thread):
 
     def pull_odex(self, project_name, package_name):
 
-        """Pull the ODEX"""
+        """Pull ODEX a little more intelligently."""
 
-        rtn = 0
+        # TODO: Samsung uses XZ, but I don't have any devices to test on.
+        #       It will need to get added back at some point, but not now.
+
+        cpu_specific_dir = self.generate_cpu_dir()
+
         vm_type = prop.get_prop("Info", "vmtype")
+        sdk = prop.get_prop("Info", "sdk")
 
-        # Lollipop moved stuff around.
+        # ART.
         if vm_type[:3] == "ART":
-            # New phones are using 64-bits. Files *may* be in the
-            # arm/ OR arm64/ directory if 64-bit is used.  If the
-            # phone is using 32-bit, it's going to be arm/.
-            cpu_bits = prop.get_prop("Info", "cpu-bits")
 
             app_files_dir = os.path.dirname(package_name)
             app_name = os.path.splitext(os.path.basename(package_name))[0]
 
-            if cpu_bits == "32":
-
-                # Marshmallow moved the OAT files to an 'oat/' directory,
-                # But Lollipop (and KitKat) buth use 'arm/'
-                app_oat_dir = "%s/oat" % app_files_dir
-                app_arm_dir = "%s/arm" % app_files_dir
-
-                if self.adb.is_dir(app_oat_dir):
-                    log.d(self.LTAG, "Using ODEX in oat/")
-                    app_odex_path = "%s/oat/arm" % app_files_dir
-                elif self.adb.is_dir(app_arm_dir):
-                    log.d(self.LTAG, "Using ODEX in arm/")
-                    app_odex_path = app_arm_dir
-                else:
-                    log.w(self.LTAG, "No ODEX directories!")
-                    return rtn
-
-                # Sometimes the ODEXs are XZ compressed. Annoying.
-                xz_odex_name = "%s/%s.odex.xz" % (app_odex_path, app_name)
-                odex_name = "%s/%s.odex" % (app_odex_path, app_name)
-
-                if self.adb.is_file(xz_odex_name):
-                    log.d(self.LTAG, "XZ ODEX exists.")
-                    rtn = self.do_pull_xz_odex(xz_odex_name, project_name)
-                elif self.adb.is_file(odex_name):
-                    log.d(self.LTAG, "Regular ART ODEX exists.")
-                    rtn = self.do_pull_odex(odex_name, project_name)
-                else:
-                    log.w(self.LTAG, "No ODEX for ART found.")
-
-            # 64-bit
+            if sdk <= constants.API_LOLLIPOP_R1:
+                app_odex_dir = "%s/%s" % (app_files_dir, cpu_specific_dir)
             else:
-                # We'll check the arm64/ directory first, then arm/.
-                # For each of these checks, we'll have to also account
-                # for the possibility of there being a XZ or not.
+                app_odex_dir = "%s/oat/%s" % (app_files_dir, cpu_specific_dir)
 
-                # Marshmallow moved the OAT files to an 'oat/' directory,
-                # But Lollipop (and KitKat) buth use 'arm/'
-                app_oat_dir = "%s/oat" % app_files_dir
+            if not self.adb.is_dir(app_odex_dir):
+                log.w(self.LTAG, "No ART ODEX directory for: %s" % app_name)
+                return 0
 
-                if self.adb.is_dir(app_oat_dir):
-                    log.d(self.LTAG, "Using ODEX in oat/")
-                    app_odex_path = "%s/oat/arm" % app_files_dir
-                elif (self.adb.is_dir(app_oat_dir)
-                        or self.adb.is_dir(app_oat_dir)):
-                    log.d(self.LTAG, "Using ODEX in arm/")
-                    app_odex_path = "%s/arm" % app_files_dir
-                else:
-                    log.w(self.LTAG, "No ODEX directories!")
-                    return rtn
+            odex_file = "%s/%s.odex" % (app_odex_dir, app_name)
 
-                # Sometimes the ODEXs are XZ compressed. Annoying.
-                xz_odex_name = "%s/%s.odex.xz" % (app_odex_path, app_name)
-                odex_name = "%s/%s.odex" % (app_odex_path, app_name)
-                xz_odex_name_64 = "%s64/%s.odex.xz" % (app_odex_path, app_name)
-                odex_name_64 = "%s64/%s.odex" % (app_odex_path, app_name)
+            return self.do_pull_odex(odex_file, project_name)
 
-                if self.adb.is_file(xz_odex_name):
-                    log.d(self.LTAG, "XZ ART ODEX exists.")
-                    rtn = self.do_pull_xz_odex(xz_odex_name, project_name)
-
-                elif self.adb.is_file(odex_name):
-                    log.d(self.LTAG, "Regular ART ODEX exists.")
-                    rtn = self.do_pull_odex(odex_name, project_name)
-
-                elif self.adb.is_file(xz_odex_name_64):
-                    log.d(self.LTAG, "XZ ART 64-bit ODEX exists.")
-                    rtn = self.do_pull_odex(xz_odex_name_64, project_name)
-
-                elif self.adb.is_file(odex_name_64):
-                    log.d(self.LTAG, "Regular ART 64-bit ODEX exists.")
-                    rtn = self.do_pull_odex(odex_name_64, project_name)
-
-                else:
-                    log.w(self.LTAG, "No ODEX for ART found.")
-        # Dalvik
+        # Dalvik.
         else:
             odex_name = re.sub("\.apk$", '.odex', package_name)
 
             if self.adb.is_file(odex_name):
                 log.d(self.LTAG, "Regular Dalvik ODEX exists.")
-                rtn = self.do_pull_odex(odex_name, project_name)
+                return self.do_pull_odex(odex_name, project_name)
 
-            else:
-                log.w(self.LTAG, "No ODEX found.")
-
-        return rtn
+            log.w(self.LTAG, "No Dalvik ODEX found for: %s" % app_name )
+            return 0
 
     def run(self):
 

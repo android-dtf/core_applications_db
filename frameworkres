@@ -16,8 +16,7 @@
 
 #@About: Configure framework resources for unpacking and repacking.
 #@Author: Jake Valletta (jakev)
-#@Health: stable
-#@Version: 1.1.0
+#@Version: 1.1.1
 
 . $DTF_CORE
 . $DTF_LOG
@@ -25,6 +24,12 @@
 fwres_dir=.fwres
 framework_dir=$(dtf prop get Local framework-dir)
 serial=$(dtf prop get Info serial)
+
+if [ -z "${framework_dir}" ]; then
+
+    echo "You need to pull frameworks first!"
+    exit 1
+fi
 
 tmp=$(mktemp -d)
 

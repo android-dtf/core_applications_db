@@ -3181,6 +3181,7 @@ class PullThread(threading.Thread):
         # Dalvik.
         else:
             odex_name = re.sub("\.apk$", '.odex', package_name)
+            app_name = os.path.splitext(os.path.basename(package_name))[0]
 
             if self.adb.is_file(odex_name):
                 log.d(self.LTAG, "Regular Dalvik ODEX exists.")
